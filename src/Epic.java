@@ -8,17 +8,24 @@ public class Epic extends Task {
         this.subtasks = new ArrayList<>();
     }
 
+    //добавить проверку статуса подзадач
+
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
     }
 
-    public void removeSubtask(Subtask subtask) {
-        subtasks.remove(subtask);
+    public void removeSubtask(int isTaskCode) {
+        for (Subtask subtask : subtasks) {
+            if (isTaskCode == subtask.getTaskCode()) {
+                subtasks.remove(subtask);
+            }
+        }
     }
 
     public ArrayList<Subtask> getSubtasks() {
         return subtasks;
     }
+
 
 
     @Override

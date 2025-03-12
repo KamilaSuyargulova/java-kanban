@@ -5,6 +5,13 @@ public class Main {
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+        taskManager.addNewTask("Купить яблоки", "");
+        taskManager.addNewTask("Записаться на маникюр", "Маникюр в BeBeauty 28/03 после 18-00");
+        taskManager.addNewEpic("Генеральная уборка", "Уборка в сб или вс, вместо Марины");
+        taskManager.addSubtask("Помыть полы", "", 3);
+        taskManager.addSubtask("Протереть пыль", "", 3);
+        taskManager.addNewEpic("Закрыть 4 спринт", "");
+        taskManager.addSubtask("Сдать 4ФЗ", "", 6);
 
         while (true) {
             printMenu();
@@ -77,24 +84,62 @@ public class Main {
     }
 
     public static void taskSearch() {
-        Task foundTask;
-        // реализация поиска и вывод информации
+        Task isTask = null;
+        System.out.println("Выберите способ поиска :");
+        System.out.println("1 - По номеру ");
+        System.out.println("2 - По названию ");
+        String command = scanner.next();
+        scanner.nextLine();
+        switch (command) {
+            case "1" -> {
+                System.out.println("Введите номер задачи:");
+                int taskCode = scanner.nextInt();
+                scanner.nextLine();
+                isTask = taskManager.searchByTaskCode(taskCode);
+            }
+            case "2" -> {
+                System.out.println("Введите название задачи");
+                String taskName = scanner.nextLine();
+                isTask = taskManager.searchByTaskName(taskName);
+            }
+            default -> System.out.println("Ошибка");
+        }
+
+        if (isTask == null) {
+            System.out.println("Задача не найдена");
+            return;
+        }
+        System.out.println("Задача найдена: ");
+        System.out.println(isTask);
+
         System.out.println("Выберите дальнейшие действия:");
         System.out.println("1 - Изменить содержание задачи");
         System.out.println("2 - Изменить статус задачи");
         System.out.println("3 - Удалить задачу");
-        System.out.println("4 - Вернуться к главному меню");
-        String command = scanner.next();
+        command = scanner.next();
+        scanner.nextLine();
         switch (command) {
             case "1" -> System.out.println("1 - Изменить содержание задачи");
-            case "2" -> System.out.println("2 - Изменить статус задачи");
-            case "3" -> System.out.println("3 - Удалить задачу");
-            case "4" -> System.out.println("4 - Вернуться к главному меню");
+            case "2" -> {
+                System.out.println("Выберите новый статус :");
+                System.out.println("1 - Над задачей ведётся работа");
+                System.out.println("2 - Задача выполнена");
+                command = scanner.next();
+                scanner.nextLine();
+                switch (command) {
+                    case "1" -> taskManager.changeStatus(isTask, TaskStatus.IN_PROGRESS);
+                    case "2" -> taskManager.changeStatus(isTask, TaskStatus.DONE);
+                    default -> System.out.println("Ошибка");
+                }
+            }
+            case "3" -> taskManager.removeTask(isTask.getTaskCode());
             default -> System.out.println("Ошибка");
         }
     }
 
 }
+
+
 
 
 
