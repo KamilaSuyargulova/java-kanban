@@ -71,13 +71,16 @@ public class Main {
                 System.out.println("Введите номер эпика:");
                 int epicCode = scanner.nextInt();
                 scanner.nextLine();
-                System.out.println("Введите название подзадачи:");
-                taskName = scanner.nextLine();
-                System.out.println("Введите описание подзадачи:");
-                taskDescription = scanner.nextLine();
-                taskManager.addSubtask(taskName, taskDescription, epicCode);
+                if (taskManager.containsEpic(epicCode)) {
+                    System.out.println("Введите название подзадачи:");
+                    taskName = scanner.nextLine();
+                    System.out.println("Введите описание подзадачи:");
+                    taskDescription = scanner.nextLine();
+                    taskManager.addSubtask(taskName, taskDescription, epicCode);
+                } else {
+                    System.out.println("Эпик с таком номером не найден");
+                }
             }
-
             default -> System.out.println("Ошибка");
 
         }

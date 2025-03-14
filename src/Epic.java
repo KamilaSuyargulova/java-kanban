@@ -8,7 +8,22 @@ public class Epic extends Task {
         this.subtasks = new ArrayList<>();
     }
 
-    //добавить проверку статуса подзадач
+    public void epicStatusTracker() {
+        int counterDone = 0;
+        for (Subtask subtask : subtasks) {
+            if (subtask.getTaskStatus().equals(TaskStatus.IN_PROGRESS)) {
+                setTaskStatus(TaskStatus.IN_PROGRESS);
+            } else if (subtask.getTaskStatus().equals(TaskStatus.DONE)) {
+                counterDone++;
+            }
+        }
+        if (counterDone == subtasks.size()) {
+            setTaskStatus(TaskStatus.DONE);
+        } else if (counterDone >0) {
+            setTaskStatus(TaskStatus.IN_PROGRESS);
+        }
+    }
+
 
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask);
@@ -27,14 +42,13 @@ public class Epic extends Task {
     }
 
 
-
     @Override
     public String toString() {
         return "Epic{ taskName: " + getTaskName() +
                 ", taskCode = " + getTaskCode() +
                 ", description: " + getTaskDescription() +
-                ", subtasks: " + subtasks +
                 ", taskStatus: " + getTaskStatus() +
+                ", subtasks: " + subtasks +
                 "}";
 
     }

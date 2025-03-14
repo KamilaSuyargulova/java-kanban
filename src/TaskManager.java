@@ -36,6 +36,16 @@ public class TaskManager {
         taskCode++;
     }
 
+    public boolean containsEpic(int epicCode) {
+        boolean containsEpic = false;
+        for (Epic epic : epics) {
+            if (epic.getTaskCode() == epicCode) {
+                containsEpic = true;
+            }
+        }
+        return containsEpic;
+    }
+
     public void addSubtask(String taskName, String taskDescription, int epicCode) {
         for (Epic epic : epics) {
             if (epic.getTaskCode() == epicCode) {
@@ -43,8 +53,6 @@ public class TaskManager {
                 epic.addSubtask(subtask);
                 System.out.println("Подзадача добавлена в эпик :" + epic.getTaskName());
                 taskCode++;
-            } else {
-                System.out.println("Эпик с таким номером не найден");
             }
         }
     }
@@ -96,7 +104,11 @@ public class TaskManager {
 
     public void changeStatus(Task task, TaskStatus TaskStatus) {
         task.setTaskStatus(TaskStatus);
-    }
+        for (Epic epic : epics) {
+            epic.epicStatusTracker();
+                }
+            }
+
 
     public void removeTask(int isTaskCode) {
         for (Task task : tasks) {
