@@ -1,128 +1,100 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class TaskManager {
-    private ArrayList<Task> tasks;
-    private ArrayList<Epic> epics;
-    private int taskCode;
+    private HashMap<Integer, Task> tasks = new HashMap<>();
+    private HashMap<Integer, Epic> epics = new HashMap<>();
+    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private int taskCode = 1;
 
-    TaskManager() {
-        tasks = new ArrayList<>();
-        epics = new ArrayList<>();
-        taskCode = 1;
+
+    public ArrayList<Task> getAllTasks() {
+        ArrayList<Task> tasksList = new ArrayList<>(tasks.values());
+        return tasksList;
     }
 
-    public void printAllTasks() {
-        if (tasks.isEmpty() && epics.isEmpty()) {
-            System.out.println("Список задач пуст");
-        } else {
-            for (Task task : tasks) {
-                System.out.println(task);
-            }
-            for (Epic epic : epics) {
-                System.out.println(epic);
-            }
+    public ArrayList<Epic> getAllEpics() {                    //
+        ArrayList<Epic> epicsList = new ArrayList<>(epics.values());
+        return epicsList;
+    }
+
+    public ArrayList<Subtask> getAllSubtasks() {
+        ArrayList<Subtask> subtasksList = new ArrayList<>(subtasks.values());//
+        return subtasksList;
+    }
+
+    public void addNewTask(Task task) {
+        task.setTaskCode(taskCode++);
+        tasks.put(task.getTaskCode(), task);
+    }
+
+    public void addNewEpic(Epic epic) {
+        epic.setTaskCode(taskCode++);
+        epics.put(epic.getTaskCode(), epic);
+    }
+
+    public void addNewSubtask(Subtask subtask) {
+        subtask.setTaskCode(taskCode++);
+        subtasks.put(subtask.getTaskCode(), subtask);
+        Epic epic = epics.get(subtask.getEpicCode());
+        if (epic != null) {
+            epic.addSubtask(subtask);
         }
+        epic.epicStatusTracker();
     }
 
-    public void addNewTask(String taskName, String taskDescription) {
-        Task task = new Task(taskName, taskDescription, taskCode, TaskStatus.NEW);
-        tasks.add(task);
-        taskCode++;
+    public Task getTaskByCode(int taskCode){
+        return tasks.get(taskCode);
     }
 
-    public void addNewEpic(String taskName, String taskDescription) {
-        Epic epic = new Epic(taskName, taskDescription, taskCode, TaskStatus.NEW);
-        epics.add(epic);
-        taskCode++;
+    public Epic getEpicByCode(int taskCode){
+        return epics.get(taskCode);
     }
 
-    public boolean containsEpic(int epicCode) {
-        boolean containsEpic = false;
-        for (Epic epic : epics) {
-            if (epic.getTaskCode() == epicCode) {
-                containsEpic = true;
-            }
-        }
-        return containsEpic;
+    public Subtask getSubtaskByCode(int taskCode){
+        return subtasks.get(taskCode);
     }
 
-    public void addSubtask(String taskName, String taskDescription, int epicCode) {
-        for (Epic epic : epics) {
-            if (epic.getTaskCode() == epicCode) {
-                Subtask subtask = new Subtask(taskName, taskDescription, taskCode, TaskStatus.NEW, epicCode);
-                epic.addSubtask(subtask);
-                System.out.println("Подзадача добавлена в эпик :" + epic.getTaskName());
-                taskCode++;
-            }
-        }
-    }
 
     public void clearAllTasks() {
+        for (Epic epic: epics.values()){
+            epic.getSubtasks().clear();
+        }
         tasks.clear();
         epics.clear();
-        taskCode = 1;
-        System.out.println("Список задач очищен");
+        subtasks.clear();
     }
 
-    public Task searchByTaskCode(int taskCode) {
-        for (Task task : tasks) {
-            if (taskCode == task.getTaskCode()) {
-                return task;
-            }
+    public void removeTaskByCode(int taskCode) {
+        tasks.remove(taskCode);
         }
-        for (Epic epic : epics) {
-            if (taskCode == epic.getTaskCode()) {
-                return epic;
-            }
-            for (Subtask subtask : epic.getSubtasks()) {
-                if (taskCode == subtask.getTaskCode()) {
-                    return subtask;
-                }
-            }
-        }
-        return null;
+
+    public void removeEpicByCode(int taskCode) {
+       Epic epicToRemove = epics.get(taskCode);
+       if (epicToRemove.getSubtasks() != null) {
+           for (Subtask subtask: epicToRemove.getSubtasks()) {
+               subtasks.remove(subtask.getTaskCode());
+           }
+           epics.remove(taskCode);
+       }
     }
 
-    public Task searchByTaskName(String taskName) {
-        for (Task task : tasks) {
-            if (taskName.equals(task.getTaskName())) {
-                return task;
-            }
-        }
-        for (Epic epic : epics) {
-            if (taskName.equals(epic.getTaskName())) {
-                return epic;
-            }
-            for (Subtask subtask : epic.getSubtasks()) {
-                if (taskName.equals(subtask.getTaskName())) {
-                    return subtask;
-                }
-            }
-        }
-        return null;
+    public void removeSubtaskByCode(int taskCode) {
+        Subtask subtaskToRemove = subtasks.get(taskCode);
+        Epic subtasksEpic = epics.get(subtaskToRemove.getEpicCode());
+        subtasksEpic.removeSubtask(subtaskToRemove);
+        subtasks.remove(subtaskToRemove);
+        subtasksEpic.epicStatusTracker();
     }
 
-    public void changeStatus(Task task, TaskStatus TaskStatus) {
-        task.setTaskStatus(TaskStatus);
-        for (Epic epic : epics) {
+    public void updateSubtask(Subtask subtask) {
+        subtasks.put(subtask.getTaskCode(), subtask);
+        Epic epic = epics.get(subtask.getEpicCode());
+        if (epic != null) {
             epic.epicStatusTracker();
-                }
-            }
-
-
-    public void removeTask(int isTaskCode) {
-        for (Task task : tasks) {
-            if (isTaskCode == task.getTaskCode()) {
-                tasks.remove(task);
-            }
-        }
-        for (Epic epic : epics) {
-            if (isTaskCode == epic.getTaskCode()) {
-                epics.remove(epic);
-            }
-            epic.removeSubtask(isTaskCode);
         }
     }
+
 }
 
 

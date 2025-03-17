@@ -5,11 +5,15 @@ public class Task {
     private TaskStatus taskStatus;
 
 
-    Task(String taskName, String taskDescription, int taskCode, TaskStatus taskStatus) {
+    Task(String taskName, String taskDescription, int taskCode) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
+        this.taskStatus = taskStatus.NEW;
         this.taskCode = taskCode;
-        this.taskStatus = taskStatus;
+    }
+
+    public void setTaskCode(Integer taskCode) {
+        this.taskCode = taskCode;
     }
 
     public String getTaskName() {
@@ -17,7 +21,7 @@ public class Task {
     }
 
     public String getTaskDescription() {
-            return taskDescription;
+        return taskDescription;
     }
 
     public int getTaskCode() {

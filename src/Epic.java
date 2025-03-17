@@ -3,23 +3,31 @@ import java.util.ArrayList;
 public class Epic extends Task {
     private ArrayList<Subtask> subtasks;
 
-    public Epic(String taskName, String taskDescription, int taskCode, TaskStatus taskStatus) {
-        super(taskName, taskDescription, taskCode, taskStatus);
+    public Epic(String taskName, String taskDescription, int taskCode) {
+        super(taskName, taskDescription, taskCode);
         this.subtasks = new ArrayList<>();
     }
 
     public void epicStatusTracker() {
-        int counterDone = 0;
+        if (subtasks.isEmpty()) {
+            setTaskStatus(TaskStatus.NEW);
+            return;
+        }
+        boolean isAllNew = true;
+        boolean isAllDone = true;
         for (Subtask subtask : subtasks) {
-            if (subtask.getTaskStatus().equals(TaskStatus.IN_PROGRESS)) {
-                setTaskStatus(TaskStatus.IN_PROGRESS);
-            } else if (subtask.getTaskStatus().equals(TaskStatus.DONE)) {
-                counterDone++;
+            if (!subtask.getTaskStatus().equals(TaskStatus.NEW)) {
+                isAllNew = false;
+            }
+            if (!subtask.getTaskStatus().equals(TaskStatus.DONE)) {
+                isAllDone = false;
             }
         }
-        if (counterDone == subtasks.size()) {
+        if (isAllNew) {
+            setTaskStatus(TaskStatus.NEW);
+        } else if (isAllDone) {
             setTaskStatus(TaskStatus.DONE);
-        } else if (counterDone >0) {
+        } else {
             setTaskStatus(TaskStatus.IN_PROGRESS);
         }
     }
@@ -29,13 +37,11 @@ public class Epic extends Task {
         subtasks.add(subtask);
     }
 
-    public void removeSubtask(int isTaskCode) {
-        for (Subtask subtask : subtasks) {
-            if (isTaskCode == subtask.getTaskCode()) {
+    public void removeSubtask(Subtask subtask) {
                 subtasks.remove(subtask);
             }
-        }
-    }
+
+
 
     public ArrayList<Subtask> getSubtasks() {
         return subtasks;
