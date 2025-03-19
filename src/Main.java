@@ -21,19 +21,18 @@ public class Main {
         Subtask subtask3 = new Subtask("Сдать 4ФЗ", "", 0, epic2.getTaskCode());
         taskManager.addNewSubtask(subtask3);
 
-
         System.out.println("Все задачи:");
-        for (Task task: taskManager.getAllTasks()){
+        for (Task task : taskManager.getAllTasks()) {
             System.out.println(task);
         }
 
         System.out.println("Все эпики:");
-        for (Epic epic: taskManager.getAllEpics()){
+        for (Epic epic : taskManager.getAllEpics()) {
             System.out.println(epic);
         }
 
         System.out.println("Все подзадачи:");
-        for (Subtask subtask: taskManager.getAllSubtasks()){
+        for (Subtask subtask : taskManager.getAllSubtasks()) {
             System.out.println(subtask);
         }
 
@@ -42,21 +41,22 @@ public class Main {
         taskManager.removeEpicByCode(epic2.getTaskCode());
 
         System.out.println("Все задачи:");
-        for (Task task: taskManager.getAllTasks()){
+        for (Task task : taskManager.getAllTasks()) {
             System.out.println(task);
         }
 
         System.out.println("Все эпики:");
-        for (Epic epic: taskManager.getAllEpics()){
+        for (Epic epic : taskManager.getAllEpics()) {
             System.out.println(epic);
         }
 
         System.out.println("Все подзадачи:");
-        for (Subtask subtask: taskManager.getAllSubtasks()){
+        for (Subtask subtask : taskManager.getAllSubtasks()) {
             System.out.println(subtask);
         }
 
     }
+
 }
 
 
