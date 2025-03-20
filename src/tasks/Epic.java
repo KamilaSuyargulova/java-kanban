@@ -1,3 +1,5 @@
+package tasks;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -46,7 +48,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{ taskName: " + getTaskName() +
+        return "tasks.Epic{ taskName: " + getTaskName() +
                 ", taskCode = " + getTaskCode() +
                 ", description: " + getTaskDescription() +
                 ", taskStatus: " + getTaskStatus() +

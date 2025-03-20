@@ -1,3 +1,6 @@
+package manager;
+
+import tasks.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -110,6 +113,13 @@ public class TaskManager {
         subtasks.put(subtask.getTaskCode(), subtask);
         Epic epic = epics.get(subtask.getEpicCode());
         if (epic != null) {
+            ArrayList<Subtask> subtasksInEpic = epic.getSubtasks();
+            for (int i = 0; i < subtasksInEpic.size(); i++) {
+                if (subtasksInEpic.get(i).getTaskCode() == subtask.getTaskCode()) {
+                    subtasksInEpic.set(i, subtask);
+                    break;
+                }
+            }
             epic.epicStatusTracker();
         }
     }

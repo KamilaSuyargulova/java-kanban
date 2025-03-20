@@ -1,3 +1,5 @@
+package tasks;
+
 import java.util.Objects;
 
 public class Task {
@@ -7,7 +9,7 @@ public class Task {
     private TaskStatus taskStatus;
 
 
-    Task(String taskName, String taskDescription, int taskCode) {
+    public Task(String taskName, String taskDescription, int taskCode) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.taskStatus = TaskStatus.NEW;
@@ -61,7 +63,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{ taskName: " + getTaskName() +
+        return "tasks.Task{ taskName: " + getTaskName() +
                 ", taskCode =" + getTaskCode() +
                 ", description: " + getTaskDescription() +
                 ", taskStatus: " + getTaskStatus() + "}";
