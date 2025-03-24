@@ -1,10 +1,12 @@
+import manager.InMemoryTaskManager;
+import manager.Managers;
 import manager.TaskManager;
 import tasks.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
 
         Task task1 = new Task("Купить яблоки", "", 0);
         taskManager.addNewTask(task1);
@@ -23,6 +25,8 @@ public class Main {
         Subtask subtask3 = new Subtask("Сдать 4ФЗ", "", 0, epic2.getTaskCode());
         taskManager.addNewSubtask(subtask3);
 
+
+        System.out.println("----------------1-----------------");
         System.out.println("Все задачи:");
         for (Task task : taskManager.getAllTasks()) {
             System.out.println(task);
@@ -38,10 +42,21 @@ public class Main {
             System.out.println(subtask);
         }
 
+        System.out.println("История просмотров: ");
+        for (Task task : taskManager.getHistory()) {
+            System.out.println(task);
+        }
+
+        taskManager.getSubtaskByCode(7);
         subtask1.setTaskStatus(TaskStatus.IN_PROGRESS);
         taskManager.updateSubtask(subtask1);      //
         taskManager.removeEpicByCode(epic2.getTaskCode());
+        taskManager.getTaskByCode(1);
+        taskManager.getEpicByCode(3);
+        taskManager.getEpicByCode(1); //несуществующий эпик
+        taskManager.getSubtaskByCode(7);  //после удаления эпика
 
+        System.out.println("----------------2-----------------");
         System.out.println("Все задачи:");
         for (Task task : taskManager.getAllTasks()) {
             System.out.println(task);
@@ -55,6 +70,11 @@ public class Main {
         System.out.println("Все подзадачи:");
         for (Subtask subtask : taskManager.getAllSubtasks()) {
             System.out.println(subtask);
+        }
+
+        System.out.println("История просмотров: ");
+        for (Task task : taskManager.getHistory()) {
+            System.out.println(task);
         }
 
     }
