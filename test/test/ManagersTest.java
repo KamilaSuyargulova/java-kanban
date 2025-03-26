@@ -2,10 +2,8 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import tasks.*;
 import manager.*;
 
 class ManagersTest {
@@ -21,6 +19,5 @@ class ManagersTest {
         HistoryManager historyManager = Managers.getDefaultHistory();
         assertNotNull(historyManager, "Менеджер истории не должен быть null");
     }
-
 
 }
