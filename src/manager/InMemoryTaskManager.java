@@ -62,20 +62,23 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskByCode(int taskCode) {
-        historyManager.add(tasks.get(taskCode));
-        return tasks.get(taskCode);
+        Task task = tasks.get(taskCode);
+        historyManager.add(task);
+        return task;
     }
 
     @Override
     public Epic getEpicByCode(int taskCode) {
-        historyManager.add(epics.get(taskCode));
-        return epics.get(taskCode);
+        Epic epic = epics.get(taskCode);
+        historyManager.add(epic);
+        return epic;
     }
 
     @Override
     public Subtask getSubtaskByCode(int taskCode) {
-        historyManager.add(subtasks.get(taskCode));
-        return subtasks.get(taskCode);
+        Subtask subtask = subtasks.get(taskCode);
+        historyManager.add(subtask);
+        return subtask;
     }
 
     @Override
