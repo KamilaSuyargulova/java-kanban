@@ -5,15 +5,15 @@ import java.util.Objects;
 public class Task {
     private String taskName;
     private String taskDescription;
-    private int taskCode;
+    private int id;
     private TaskStatus taskStatus;
 
 
-    public Task(String taskName, String taskDescription, int taskCode) {
+    public Task(String taskName, String taskDescription, int id) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.taskStatus = TaskStatus.NEW;
-        this.taskCode = taskCode;
+        this.id = id;
     }
 
     public void setTaskName(String taskName) {
@@ -24,8 +24,8 @@ public class Task {
         this.taskDescription = taskDescription;
     }
 
-    public void setTaskCode(Integer taskCode) {
-        this.taskCode = taskCode;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getTaskName() {
@@ -36,8 +36,8 @@ public class Task {
         return taskDescription;
     }
 
-    public int getTaskCode() {
-        return taskCode;
+    public int getId() {
+        return id;
     }
 
     public TaskStatus getTaskStatus() {
@@ -50,7 +50,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskCode);
+        return Objects.hash(id);
     }
 
     @Override
@@ -58,13 +58,13 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return taskCode == task.taskCode;
+        return id == task.id;
     }
 
     @Override
     public String toString() {
         return "tasks.Task{ taskName: " + getTaskName() +
-                ", taskCode =" + getTaskCode() +
+                ", id =" + getId() +
                 ", description: " + getTaskDescription() +
                 ", taskStatus: " + getTaskStatus() + "}";
     }

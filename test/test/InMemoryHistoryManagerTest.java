@@ -28,7 +28,7 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task1);
         historyManager.add(task2);
 
-        ArrayList<Task> history = historyManager.getHistory();
+        ArrayList<Task> history = (ArrayList<Task>) historyManager.getHistory();
 
         assertEquals(2, history.size(), "История должна содержать 2 задачи");
         assertEquals(task1, history.get(0), "Первая в списке задача № 1");
@@ -36,28 +36,16 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldAddTasksDuplicateToHistory() {
+    void shouldNotContainDuplicates() {
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(task1);
 
-        ArrayList<Task> history = historyManager.getHistory();
+        ArrayList<Task> history = (ArrayList<Task>) historyManager.getHistory();
 
-        assertEquals(3, history.size(), "История должна содержать 3 задачи");
-        assertEquals(task1, history.get(0), "Первая в списке задача № 1");
-        assertEquals(task2, history.get(1), "Вторая в списке задача № 2");
-        assertEquals(task1, history.get(2), "Повторное добавление задачи № 1 в конец списка");
-    }
-
-    @Test
-    void shouldLimitHistorySize() {
-        for (int i = 0; i < 12; i++) {
-            Task t = new Task("имя1", "описание1", i);
-            historyManager.add(t);
-        }
-
-        assertEquals(10, historyManager.getHistory().size(),
-                "Максимальное кол-во задач в истории - 10");
+        assertEquals(2, history.size(), "История должна содержать 2 задачи");
+        assertEquals(task2, history.get(0), "Первая в списке задача № 2");
+        assertEquals(task1, history.get(1), "Повторное добавление задачи № 1 в конец списка");
     }
 
     @Test
@@ -65,6 +53,14 @@ class InMemoryHistoryManagerTest {
         historyManager.add(null);
 
         assertTrue(historyManager.getHistory().isEmpty(), "История должна игнорировать null");
+    }
+
+    @Test
+    void shouldRemoveTaskFromHistory() {
+        historyManager.add(task1);
+        historyManager.remove(1);
+
+        assertTrue(historyManager.getHistory().isEmpty(), "История должна быть пустая после удаления");
     }
 
 }
