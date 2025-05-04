@@ -22,23 +22,18 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
     private Node tail;
 
-    // private final ArrayList<Task> history = new ArrayList<>();
-
     @Override
     public void add(Task task) {
         if (task == null) {
             return;
         }
-        remove(task.getId()); //удаляем из списка, если уже был
+        removeNode(task.getId());   //в приватный метод removeNode()
         linkLast(task);
     }
 
     @Override
     public void remove(int id) {
-        Node node = historyMap.remove(id);
-        if (node != null) {
-            removeNode(node);
-        }
+        removeNode(id);  //в приватный метод removeNode()
     }
 
     @Override
@@ -64,17 +59,20 @@ public class InMemoryHistoryManager implements HistoryManager {
         historyMap.put(task.getId(), newNode);
     }
 
-    private void removeNode(Node node) {
-        if (node.last != null) {
-            node.last.next = node.next;
-        } else {
-            head = node.next;
-        }
+    private void removeNode(int id) {
+        Node node = historyMap.remove(id);
+        if (node != null) {
+            if (node.last != null) {
+                node.last.next = node.next;
+            } else {
+                head = node.next;
+            }
 
-        if (node.next != null) {
-            node.next.last = node.last;
-        } else {
-            tail = node.last;
+            if (node.next != null) {
+                node.next.last = node.last;
+            } else {
+                tail = node.last;
+            }
         }
     }
 

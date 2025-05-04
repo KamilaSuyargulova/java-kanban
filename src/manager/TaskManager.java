@@ -5,6 +5,7 @@ import tasks.Subtask;
 import tasks.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
     //задачи
@@ -48,5 +49,5 @@ public interface TaskManager {
 
     ArrayList<Subtask> getAllSubtasksByEpicId(int id);
 
-    ArrayList<Task> getHistory();
+    List<Task> getHistory();
 }

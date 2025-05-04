@@ -9,6 +9,7 @@ import tasks.*;
 import manager.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 class InMemoryTaskManagerTest {
     private TaskManager taskManager;
@@ -191,7 +192,7 @@ class InMemoryTaskManagerTest {
         taskManager.getTaskById(task.getId());
         taskManager.getEpicById(epic.getId());
         taskManager.getSubtaskById(subtask.getId());
-        ArrayList<Task> history = taskManager.getHistory();
+        List<Task> history = taskManager.getHistory();
 
         assertEquals(3, history.size(), "В историю должна добавиться задача, эпик и подзадача");
         assertEquals(task, history.get(0), "История должна содержать просмотренную задачу");

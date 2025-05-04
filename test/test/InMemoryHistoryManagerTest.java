@@ -8,18 +8,20 @@ import org.junit.jupiter.api.Test;
 import tasks.*;
 import manager.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 class InMemoryHistoryManagerTest {
     private HistoryManager historyManager;
     private Task task1;
     private Task task2;
+    private Task task3;
 
     @BeforeEach
     void setUp() {
         historyManager = Managers.getDefaultHistory();
         task1 = new Task("имя1", "описание1", 1);
         task2 = new Task("имя2", "описание2", 2);
+        task3 = new Task("имя3", "описание3", 3);
         task1.setTaskStatus(TaskStatus.IN_PROGRESS);
     }
 
@@ -28,7 +30,7 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task1);
         historyManager.add(task2);
 
-        ArrayList<Task> history = (ArrayList<Task>) historyManager.getHistory();
+        List<Task> history = historyManager.getHistory();
 
         assertEquals(2, history.size(), "История должна содержать 2 задачи");
         assertEquals(task1, history.get(0), "Первая в списке задача № 1");
@@ -41,7 +43,7 @@ class InMemoryHistoryManagerTest {
         historyManager.add(task2);
         historyManager.add(task1);
 
-        ArrayList<Task> history = (ArrayList<Task>) historyManager.getHistory();
+        List<Task> history = historyManager.getHistory();
 
         assertEquals(2, history.size(), "История должна содержать 2 задачи");
         assertEquals(task2, history.get(0), "Первая в списке задача № 2");
@@ -61,6 +63,49 @@ class InMemoryHistoryManagerTest {
         historyManager.remove(1);
 
         assertTrue(historyManager.getHistory().isEmpty(), "История должна быть пустая после удаления");
+    }
+
+    @Test
+    void shouldRemoveFromBeginningAndSaveCorrectOrder() {
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        historyManager.remove(task1.getId());
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(2, history.size(), "История должна содержать 2 задачи");
+        assertEquals(task2.getId(), history.get(0).getId(), "Все задачи станут выше в списке после удления №1");
+        assertEquals(task3.getId(), history.get(1).getId(), "Все задачи станут выше в списке после удления №1");
+    }
+
+    @Test
+    void shouldRemoveFromMiddleAndSaveCorrectOrder() {
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        historyManager.remove(task2.getId());
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(2, history.size(), "История должна содержать 2 задачи");
+        assertEquals(task1.getId(), history.get(0).getId(), "Задачи до удаленной остаются на месте");
+        assertEquals(task3.getId(), history.get(1).getId(), "Задачи после удаленной станут выше в списке");
+    }
+
+
+    @Test
+    void shouldRemoveFromEndAndSaveCorrectOrder() {
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        historyManager.remove(task3.getId());
+
+        List<Task> history = historyManager.getHistory();
+
+        assertEquals(2, history.size(), "История должна содержать 2 задачи");
+        assertEquals(task1.getId(), history.get(0).getId(), "Задачи на месте после удаления последней");
+        assertEquals(task2.getId(), history.get(1).getId(), "Задачи на месте после удаления последней");
     }
 
 }
