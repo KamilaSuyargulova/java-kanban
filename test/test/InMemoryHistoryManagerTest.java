@@ -74,9 +74,8 @@ class InMemoryHistoryManagerTest {
 
         List<Task> history = historyManager.getHistory();
 
-        assertEquals(2, history.size(), "История должна содержать 2 задачи");
-        assertEquals(task2.getId(), history.get(0).getId(), "Все задачи станут выше в списке после удления №1");
-        assertEquals(task3.getId(), history.get(1).getId(), "Все задачи станут выше в списке после удления №1");
+        assertEquals(List.of(task2, task3), historyManager.getHistory(),
+                "Все задачи станут выше в списке после удления №1");
     }
 
     @Test
@@ -88,9 +87,8 @@ class InMemoryHistoryManagerTest {
 
         List<Task> history = historyManager.getHistory();
 
-        assertEquals(2, history.size(), "История должна содержать 2 задачи");
-        assertEquals(task1.getId(), history.get(0).getId(), "Задачи до удаленной остаются на месте");
-        assertEquals(task3.getId(), history.get(1).getId(), "Задачи после удаленной станут выше в списке");
+        assertEquals(List.of(task1, task3), historyManager.getHistory(),
+                "Задачи после удаленной станут выше в списке");
     }
 
 
@@ -103,9 +101,8 @@ class InMemoryHistoryManagerTest {
 
         List<Task> history = historyManager.getHistory();
 
-        assertEquals(2, history.size(), "История должна содержать 2 задачи");
-        assertEquals(task1.getId(), history.get(0).getId(), "Задачи на месте после удаления последней");
-        assertEquals(task2.getId(), history.get(1).getId(), "Задачи на месте после удаления последней");
+        assertEquals(List.of(task1, task2), historyManager.getHistory(),
+                "Задачи на месте после удаления последней");
     }
 
 }
