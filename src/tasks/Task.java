@@ -7,6 +7,7 @@ public class Task {
     private String taskDescription;
     private int id;
     private TaskStatus taskStatus;
+    protected TaskType taskType;
 
 
     public Task(String taskName, String taskDescription, int id) {
@@ -14,6 +15,11 @@ public class Task {
         this.taskDescription = taskDescription;
         this.taskStatus = TaskStatus.NEW;
         this.id = id;
+        this.taskType = TaskType.TASK;
+    }
+
+    public TaskType getType() {
+        return taskType;
     }
 
     public void setTaskName(String taskName) {
