@@ -11,7 +11,7 @@ public interface TaskManager {
     //задачи
     ArrayList<Task> getAllTasks();
 
-    int addNewTask(Task task);
+    void addNewTask(Task task);
 
     Task getTaskById(int id);
 
