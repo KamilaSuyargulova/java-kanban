@@ -35,8 +35,6 @@ class FileBackedTaskManagerTest {
 
     @Test
     void shouldSaveAndLoadTasks() throws IOException {
-        taskManager.save();
-
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
 
         assertEquals(taskManager.getAllTasks(), loadedManager.getAllTasks(), "Все задачи должны сохраниться");
@@ -49,7 +47,6 @@ class FileBackedTaskManagerTest {
     void shouldSaveAndLoadEmptyManager() throws IOException {
         File emptyFile = Files.createTempFile("empty", ".csv").toFile();
         FileBackedTaskManager emptyManager = new FileBackedTaskManager(emptyFile);
-        emptyManager.save();
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(emptyFile);
 

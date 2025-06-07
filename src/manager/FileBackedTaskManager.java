@@ -31,7 +31,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println("Subtasks: " + loadedManager.getAllSubtasks());
     }
 
-    public void save() {
+    private void save() {
         try {
             StringBuilder sb = new StringBuilder();
             sb.append("id,type,name,status,description,epic\n");
