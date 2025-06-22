@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.HashMap;
 
 public class InMemoryTaskManager implements TaskManager {
-    private HashMap<Integer, Task> tasks = new HashMap<>();
-    private HashMap<Integer, Epic> epics = new HashMap<>();
-    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    private int id = 1;
+    protected HashMap<Integer, Task> tasks = new HashMap<>();
+    protected HashMap<Integer, Epic> epics = new HashMap<>();
+    protected HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected int id = 1;
     private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
@@ -38,10 +38,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int addNewTask(Task task) {
+    public void addNewTask(Task task) {
         task.setId(id++);
         tasks.put(task.getId(), task);
-        return 0;
     }
 
     @Override

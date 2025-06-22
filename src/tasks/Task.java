@@ -16,6 +16,10 @@ public class Task {
         this.id = id;
     }
 
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
+
     public void setTaskName(String taskName) {
         this.taskName = taskName;
     }
