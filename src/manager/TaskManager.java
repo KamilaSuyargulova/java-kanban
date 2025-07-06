@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface TaskManager {
+
+    List<Task> getPrioritizedTasks();
+
     //задачи
     ArrayList<Task> getAllTasks();
 

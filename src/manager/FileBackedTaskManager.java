@@ -5,6 +5,8 @@ import tasks.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -17,9 +19,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         File file = File.createTempFile("tasks", ".csv");
         FileBackedTaskManager manager = new FileBackedTaskManager(file);
 
-        manager.addNewTask(new Task("Записаться на маникюр", "Маникюр в BeBeauty 29.05", 1));
+        manager.addNewTask(new Task("Записаться на маникюр", "Маникюр в BeBeauty 29.05", 1,
+                Duration.ofMinutes(120), LocalDateTime.of(2025, 6, 28, 10, 0)));
         manager.addNewEpic(new Epic("Генеральная уборка", "Уборка в сб или вс", 2));
-        manager.addNewSubtask(new Subtask("Помыть полы", "полы", 3, 2));
+        manager.addNewSubtask(new Subtask("Помыть полы", "полы", 3, 2,
+                Duration.ofMinutes(30), LocalDateTime.of(2025, 6, 30, 18, 0)));
 
         System.out.println("Файл будет сохранён в: " + file.getAbsolutePath());
 
@@ -34,7 +38,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void save() {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("id,type,name,status,description,epic\n");
+            sb.append("id,type,name,status,description,epic,duration,startTime\n");
 
             for (Task task : getAllTasks()) {
                 sb.append(StringConverter.taskToString(task)).append("\n");
@@ -156,3 +160,4 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 }
+

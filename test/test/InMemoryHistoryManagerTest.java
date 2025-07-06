@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import tasks.*;
 import manager.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 class InMemoryHistoryManagerTest {
@@ -19,9 +21,12 @@ class InMemoryHistoryManagerTest {
     @BeforeEach
     void setUp() {
         historyManager = Managers.getDefaultHistory();
-        task1 = new Task("имя1", "описание1", 1);
-        task2 = new Task("имя2", "описание2", 2);
-        task3 = new Task("имя3", "описание3", 3);
+        task1 = new Task("имя1", "описание1", 1,
+                Duration.ofMinutes(30), LocalDateTime.of(2025, 6, 28, 20, 0));
+        task2 = new Task("имя2", "описание2", 2,
+                Duration.ofMinutes(30), LocalDateTime.of(2025, 6, 28, 21, 0));
+        task3 = new Task("имя3", "описание3", 3,
+                Duration.ofMinutes(30), LocalDateTime.of(2025, 6, 28, 22, 0));
         task1.setTaskStatus(TaskStatus.IN_PROGRESS);
     }
 
