@@ -10,27 +10,19 @@ import manager.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 
-class FileBackedTaskManagerTest {
-    private FileBackedTaskManager taskManager;
+
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private File file;
-    private Task task;
-    private Epic epic;
-    private Subtask subtask;
 
-    @BeforeEach
-    void setUp() throws IOException {
-        file = Files.createTempFile("tasks", ".csv").toFile();
-        taskManager = new FileBackedTaskManager(file);
-
-        task = new Task("имя", "описание", 1);
-        taskManager.addNewTask(task);
-        epic = new Epic("имя", "описание", 2);
-        taskManager.addNewEpic(epic);
-        subtask = new Subtask("имя", "описание", 3, epic.getId());
-        taskManager.addNewSubtask(subtask);
+    @Override
+    protected FileBackedTaskManager createTaskManager() {
+        try {
+            file = Files.createTempFile("tasks", ".csv").toFile();
+            return new FileBackedTaskManager(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Не удалось создать временный файл", e);
+        }
     }
 
     @Test
