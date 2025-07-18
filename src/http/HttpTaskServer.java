@@ -7,13 +7,13 @@ import manager.TaskManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-public class HttpTaskServer {
-    private static final int PORT = 8080;
-    private final HttpServer server;
+public class HttpTaskServer {                //При проверке работы в insomnia всплыло много недочетов
+    private static final int PORT = 8080;   //пришлось нестколько раз переписать класы пакета http и немного старых
+    private final HttpServer server;       //боюсь что-то еще менять
     private final TaskManager taskManager;
 
-    public HttpTaskServer() throws IOException {
-        this.taskManager = Managers.getDefault();
+    public HttpTaskServer(TaskManager manager) throws IOException {
+        this.taskManager = manager;
         this.server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
         server.createContext("/tasks", new TasksHandler(taskManager));
@@ -24,7 +24,8 @@ public class HttpTaskServer {
     }
 
     public static void main(String[] args) throws IOException {
-        HttpTaskServer httpTaskServer = new HttpTaskServer();
+        TaskManager manager = Managers.getDefault();
+        HttpTaskServer httpTaskServer = new HttpTaskServer(manager);
         httpTaskServer.start();
     }
 

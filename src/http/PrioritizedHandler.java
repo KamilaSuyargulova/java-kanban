@@ -1,55 +1,58 @@
 package http;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import manager.*;
 import tasks.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
-    private final TaskManager taskManager;
-    private final Gson gson;
 
     public PrioritizedHandler(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        this.gson = new Gson();
+        super(taskManager);
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
-            if ("GET".equals(exchange.getRequestMethod())) {
+            String method = exchange.getRequestMethod();
+            String path = exchange.getRequestURI().getPath();
+            if (!"GET".equals(method)) {
+                sendNotFound(exchange);
+                return;
+            }
+            if ("/prioritized".equals(path)) {
                 handleGetPrioritized(exchange);
             } else {
                 sendNotFound(exchange);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             sendInternalError(exchange);
         }
     }
 
     private void handleGetPrioritized(HttpExchange exchange) throws IOException {
-        List<Task> prioritized = taskManager.getPrioritizedTasks();
-        List<Map<String, Object>> responseList = new ArrayList<>();
+        List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
 
-        for (Task task : prioritized) {
-            Map<String, Object> taskMap = new HashMap<>();
-            taskMap.put("id", task.getId());
-            taskMap.put("taskName", task.getTaskName());
-            taskMap.put("type", task.getType());
-
-            if (task.getStartTime() != null) {
-                taskMap.put("startTime", task.getStartTime().toString());
-                taskMap.put("endTime", task.getEndTime().toString());
-            }
-            responseList.add(taskMap);
-        }
+        List<Map<String, Object>> responseList = prioritizedTasks.stream()
+                .map(task -> {
+                    Map<String, Object> taskMap = createTaskMap(task);
+                    if (task instanceof Subtask) {
+                        taskMap.put("epicId", ((Subtask) task).getEpicId());
+                    } else if (task instanceof Epic) {
+                        taskMap.put("subtasks", ((Epic) task).getSubtasks().stream()
+                                .map(Subtask::getId)
+                                .collect(Collectors.toList()));
+                    }
+                    return taskMap;
+                })
+                .collect(Collectors.toList());
         sendSuccess(exchange, gson.toJson(responseList));
     }
+
 }

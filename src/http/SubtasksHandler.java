@@ -1,25 +1,20 @@
 package http;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import manager.*;
 import tasks.*;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
-    private final TaskManager taskManager;
-    private final Gson gson;
 
     public SubtasksHandler(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        this.gson = new Gson();
+        super(taskManager);
     }
 
     @Override
@@ -77,8 +72,9 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
             int id = Integer.parseInt(idStr);
             Subtask subtask = taskManager.getSubtaskById(id);
             if (subtask != null) {
-                String response = gson.toJson(subtask);
-                sendSuccess(exchange, response);
+                Map<String, Object> subtaskMap = createTaskMap(subtask);
+                subtaskMap.put("epicId", subtask.getEpicId());
+                sendSuccess(exchange, gson.toJson(subtaskMap));
             } else {
                 sendNotFound(exchange);
             }
@@ -90,42 +86,72 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleCreateOrUpdateSubtask(HttpExchange exchange) throws IOException {
         String requestBody = readText(exchange);
         try {
-            Map<String, Object> requestMap = gson.fromJson(requestBody, Map.class);
-
-            if (!requestMap.containsKey("epicId")) {
-                sendBadRequest(exchange, "Поле 'epicId' обязательно для подзадачи");
+            Subtask subtask = gson.fromJson(requestBody, Subtask.class);
+            if (subtask == null) {
+                sendBadRequest(exchange, "Неверный формат данных подзадачи");
                 return;
             }
 
-            Subtask subtask = new Subtask(
-                    (String) requestMap.get("taskName"),
-                    (String) requestMap.get("taskDescription"),
-                    ((Double) requestMap.getOrDefault("id", 0.0)).intValue(),
-                    ((Double) requestMap.get("epicId")).intValue(),
-                    requestMap.containsKey("duration")
-                            ? Duration.ofMinutes(((Double) requestMap.get("duration")).longValue())
-                            : null,
-                    requestMap.containsKey("startTime")
-                            ? LocalDateTime.parse((String) requestMap.get("startTime"))
-                            : null
-            );
+            if (subtask.getTaskName() == null || subtask.getTaskName().isEmpty()) {
+                sendBadRequest(exchange, "Название подзадачи обязательно");
+                return;
+            }
+            if (subtask.getEpicId() == 0) {
+                sendBadRequest(exchange, "Не указан ID эпика");
+                return;
+            }
+
+            Epic epic = taskManager.getEpicById(subtask.getEpicId());
+            if (epic == null) {
+                sendNotFound(exchange);
+                return;
+            }
+
+            try {
+                if (!canAddSubtaskToEpic(epic)) {
+                    sendBadRequest(exchange, "Эпик не готов к добавлению подзадач");
+                    return;
+                }
+            } catch (NullPointerException e) {
+                sendBadRequest(exchange, "Некорректное состояние эпика");
+                return;
+            }
+
+            if (subtask.getStartTime() != null && !isTimeValid(subtask)) {
+                sendHasInteractions(exchange);
+                return;
+            }
 
             if (subtask.getId() == 0) {
                 taskManager.addNewSubtask(subtask);
-                sendCreated(exchange, gson.toJson(Map.of(
-                        "id", subtask.getId(),
-                        "status", "SUCCESS"
-                )));
+                sendCreated(exchange, createSuccessResponse(subtask));
             } else {
                 taskManager.updateSubtask(subtask);
-                sendSuccess(exchange, gson.toJson(Map.of(
-                        "status", "UPDATED"
-                )));
+                sendCreated(exchange, createSuccessResponse(subtask));
             }
+        } catch (JsonSyntaxException e) {
+            sendBadRequest(exchange, "Ошибка в формате JSON");
         } catch (Exception e) {
             e.printStackTrace();
             sendInternalError(exchange);
         }
+    }
+
+    private boolean canAddSubtaskToEpic(Epic epic) {
+        try {
+            if (epic.getSubtasks() == null) {
+                return false;
+            }
+            return true;
+        } catch (NullPointerException e) {
+            return false;
+        }
+    }
+
+    private String createSuccessResponse(Subtask subtask) {
+        Map<String, Object> response = createTaskMap(subtask);
+        response.put("epicId", subtask.getEpicId());
+        return gson.toJson(response);
     }
 
     private void handleDeleteAllSubtasks(HttpExchange exchange) throws IOException {
@@ -136,11 +162,16 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleDeleteSubtaskById(HttpExchange exchange, String idStr) throws IOException {
         try {
             int id = Integer.parseInt(idStr);
-            taskManager.removeSubtaskById(id);
-            sendSuccess(exchange, "Сабтаск №  " + id + " удален");
+            boolean removed = taskManager.removeSubtaskById(id);
+            if (removed) {
+                sendSuccess(exchange, "Подзадача № " + id + " удалена");
+            } else {
+                sendNotFound(exchange);
+            }
         } catch (NumberFormatException e) {
-            sendNotFound(exchange);
+            sendBadRequest(exchange, "Некорректный ID подзадачи");
         }
     }
 
 }
+

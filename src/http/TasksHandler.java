@@ -1,25 +1,20 @@
 package http;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import manager.*;
 import tasks.*;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class TasksHandler extends BaseHttpHandler implements HttpHandler {
-    private final TaskManager taskManager;
-    private final Gson gson;
 
     public TasksHandler(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        this.gson = new Gson();
+        super(taskManager);
     }
 
     @Override
@@ -66,7 +61,6 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         for (Task task : tasks) {
             responseList.add(createTaskMap(task));
         }
-
         sendSuccess(exchange, gson.toJson(responseList));
     }
 
@@ -88,32 +82,26 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException {
         String requestBody = readText(exchange);
         try {
-            Map<String, Object> requestMap = gson.fromJson(requestBody, Map.class);
-
-            Task task = new Task(
-                    (String) requestMap.get("taskName"),
-                    (String) requestMap.get("taskDescription"),
-                    ((Double) requestMap.getOrDefault("id", 0.0)).intValue(),
-                    requestMap.containsKey("duration")
-                            ? Duration.ofMinutes(((Double) requestMap.get("duration")).longValue())
-                            : null,
-                    requestMap.containsKey("startTime")
-                            ? LocalDateTime.parse((String) requestMap.get("startTime"))
-                            : null
-            );
-
+            Task task = gson.fromJson(requestBody, Task.class);
+            if (task.getTaskName() == null || task.getTaskName().isEmpty()) {
+                sendBadRequest(exchange, "Поле 'taskName' обязательно");
+                return;
+            }
+            if (!isTimeValid(task)) {
+                sendHasInteractions(exchange);
+                return;
+            }
             if (task.getId() == 0) {
                 taskManager.addNewTask(task);
-                sendCreated(exchange, gson.toJson(Map.of(
-                        "id", task.getId(),
-                        "status", "SUCCESS"
-                )));
+                sendCreated(exchange, gson.toJson(createTaskMap(task)));
             } else {
                 taskManager.updateTask(task);
-                sendSuccess(exchange, gson.toJson(Map.of(
-                        "status", "UPDATED"
-                )));
+                sendCreated(exchange, gson.toJson(createTaskMap(task)));
             }
+        } catch (JsonSyntaxException e) {
+            sendBadRequest(exchange, "Неверный формат JSON: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            sendBadRequest(exchange, e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             sendInternalError(exchange);
@@ -128,10 +116,15 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     private void handleDeleteTaskById(HttpExchange exchange, String idStr) throws IOException {
         try {
             int id = Integer.parseInt(idStr);
-            taskManager.removeTaskById(id);
-            sendSuccess(exchange, "Задача №  " + id + " удалена");
+            boolean removed = taskManager.removeTaskById(id);
+            if (removed) {
+                sendSuccess(exchange, "Задача № " + id + " удалена");
+            } else {
+                sendNotFound(exchange);
+            }
         } catch (NumberFormatException e) {
             sendNotFound(exchange);
         }
     }
+
 }

@@ -44,7 +44,8 @@ public class InMemoryTaskManager implements TaskManager {
                 });
     }
 
-    private boolean isTimeOverlap(Task task1, Task task2) {
+    @Override
+    public boolean isTimeOverlap(Task task1, Task task2) {
         LocalDateTime start1 = task1.getStartTime();
         LocalDateTime end1 = task1.getEndTime();
         LocalDateTime start2 = task2.getStartTime();
@@ -159,14 +160,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void removeTaskById(int id) {
+    public boolean removeTaskById(int id) {
         tasks.remove(id);
         prioritizedTasks.removeIf(t -> t.getId() == id);
         historyManager.remove(id);
+        return true;
     }
 
     @Override
-    public void removeEpicById(int id) {
+    public boolean removeEpicById(int id) {
         Epic epicToRemove = epics.get(id);
         if (epicToRemove.getSubtasks() != null) {
             for (Subtask subtask : epicToRemove.getSubtasks()) {
@@ -178,10 +180,11 @@ public class InMemoryTaskManager implements TaskManager {
         }
         prioritizedTasks.removeIf(t -> t.getId() == id);
         historyManager.remove(id);
+        return true;
     }
 
     @Override
-    public void removeSubtaskById(int id) {
+    public boolean removeSubtaskById(int id) {
         Subtask subtaskToRemove = subtasks.get(id);
         Epic subtasksEpic = epics.get(subtaskToRemove.getEpicId());
         subtasksEpic.removeSubtask(subtaskToRemove);
@@ -189,6 +192,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasksEpic.updateEpicStatusTime();
         prioritizedTasks.remove(subtaskToRemove);
         historyManager.remove(id);
+        return true;
     }
 
     @Override
@@ -205,7 +209,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {                      //тоже стрим?
+    public void updateSubtask(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(subtask.getEpicId());
         if (epic != null) {

@@ -1,6 +1,6 @@
 package http;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import manager.*;
@@ -13,12 +13,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
-    private final TaskManager taskManager;
-    private final Gson gson;
 
     public EpicsHandler(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        this.gson = new Gson();
+        super(taskManager);
     }
 
     @Override
@@ -34,6 +31,8 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                         handleGetAllEpics(exchange);
                     } else if (pathParts.length == 3) {
                         handleGetEpicById(exchange, pathParts[2]);
+                    } else if (pathParts.length == 4 && "subtasks".equals(pathParts[3])) {
+                        handleGetEpicSubtasks(exchange, pathParts[2]);
                     } else {
                         sendNotFound(exchange);
                     }
@@ -54,23 +53,34 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                     sendNotFound(exchange);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             sendInternalError(exchange);
         }
     }
 
     private void handleGetAllEpics(HttpExchange exchange) throws IOException {
-        List<Epic> epics = taskManager.getAllEpics();
-        List<Map<String, Object>> responseList = new ArrayList<>();
+        try {
+            List<Epic> epics = taskManager.getAllEpics();
+            List<Map<String, Object>> responseList = new ArrayList<>();
 
-        for (Epic epic : epics) {
-            Map<String, Object> epicMap = createTaskMap(epic);
-            epicMap.put("subtasks", epic.getSubtasks().stream()
-                    .map(Subtask::getId)
-                    .collect(Collectors.toList()));
-            responseList.add(epicMap);
+            for (Epic epic : epics) {
+                Map<String, Object> epicMap = createTaskMap(epic);
+
+                List<Integer> subtaskIds = new ArrayList<>();
+                if (epic.getSubtasks() != null) {
+                    subtaskIds = epic.getSubtasks().stream()
+                            .map(Subtask::getId)
+                            .collect(Collectors.toList());
+                }
+
+                epicMap.put("subtasks", subtaskIds);
+                responseList.add(epicMap);
+            }
+            sendSuccess(exchange, gson.toJson(responseList));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendInternalError(exchange);
         }
-
-        sendSuccess(exchange, gson.toJson(responseList));
     }
 
     private void handleGetEpicById(HttpExchange exchange, String idStr) throws IOException {
@@ -78,50 +88,76 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
             int id = Integer.parseInt(idStr);
             Epic epic = taskManager.getEpicById(id);
             if (epic != null) {
-                String response = gson.toJson(epic);
-                sendSuccess(exchange, response);
+                Map<String, Object> epicMap = createTaskMap(epic);
+
+                List<Integer> subtaskIds = new ArrayList<>();
+                if (epic.getSubtasks() != null) {
+                    subtaskIds = epic.getSubtasks().stream()
+                            .map(Subtask::getId)
+                            .collect(Collectors.toList());
+                }
+
+                epicMap.put("subtasks", subtaskIds);
+                sendSuccess(exchange, gson.toJson(epicMap));
             } else {
                 sendNotFound(exchange);
             }
         } catch (NumberFormatException e) {
-            sendNotFound(exchange);
+            sendBadRequest(exchange, "Некорректный ID эпика");
         }
     }
 
     private void handleGetEpicSubtasks(HttpExchange exchange, String idStr) throws IOException {
         try {
             int id = Integer.parseInt(idStr);
+            Epic epic = taskManager.getEpicById(id);
+            if (epic == null) {
+                sendNotFound(exchange);
+                return;
+            }
+
             List<Subtask> subtasks = taskManager.getAllSubtasksByEpicId(id);
-            String response = gson.toJson(subtasks);
-            sendSuccess(exchange, response);
+            List<Map<String, Object>> subtaskMaps = subtasks.stream()
+                    .map(this::createTaskMap)
+                    .collect(Collectors.toList());
+
+            sendSuccess(exchange, gson.toJson(subtaskMaps));
         } catch (NumberFormatException e) {
-            sendNotFound(exchange);
+            sendBadRequest(exchange, "Некорректный ID эпика");
         }
     }
 
     private void handleCreateOrUpdateEpic(HttpExchange exchange) throws IOException {
         String requestBody = readText(exchange);
         try {
-            Map<String, Object> requestMap = gson.fromJson(requestBody, Map.class);
+            Epic epic = gson.fromJson(requestBody, Epic.class);
 
-            Epic epic = new Epic(
-                    (String) requestMap.get("taskName"),
-                    (String) requestMap.get("taskDescription"),
-                    ((Double) requestMap.getOrDefault("id", 0.0)).intValue()
-            );
+            if (epic.getTaskName() == null || epic.getTaskName().isEmpty()) {
+                sendBadRequest(exchange, "Поле 'taskName' обязательно для эпика");
+                return;
+            }
+
+            if (epic.getSubtasks() == null) {
+                epic.setSubtasks(new ArrayList<>());
+            }
 
             if (epic.getId() == 0) {
                 taskManager.addNewEpic(epic);
-                sendCreated(exchange, gson.toJson(Map.of(
-                        "id", epic.getId(),
-                        "status", "SUCCESS"
-                )));
+                Map<String, Object> responseMap = createTaskMap(epic);
+                responseMap.put("subtasks", new ArrayList<>());
+                sendCreated(exchange, gson.toJson(responseMap));
             } else {
                 taskManager.updateEpic(epic);
-                sendSuccess(exchange, gson.toJson(Map.of(
-                        "status", "UPDATED"
-                )));
+                Map<String, Object> responseMap = createTaskMap(epic);
+                responseMap.put("subtasks", epic.getSubtasks().stream()
+                        .map(Subtask::getId)
+                        .collect(Collectors.toList()));
+                sendCreated(exchange, gson.toJson(responseMap));
             }
+        } catch (JsonSyntaxException e) {
+            sendBadRequest(exchange, "Неверный формат JSON: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            sendBadRequest(exchange, e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             sendInternalError(exchange);
@@ -136,10 +172,15 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
     private void handleDeleteEpicById(HttpExchange exchange, String idStr) throws IOException {
         try {
             int id = Integer.parseInt(idStr);
-            taskManager.removeEpicById(id);
-            sendSuccess(exchange, "Эпик № " + id + " удален");
+            boolean removed = taskManager.removeEpicById(id);
+            if (removed) {
+                sendSuccess(exchange, "Эпик № " + id + " и его подзадачи удалены");
+            } else {
+                sendNotFound(exchange);
+            }
         } catch (NumberFormatException e) {
-            sendNotFound(exchange);
+            sendBadRequest(exchange, "Некорректный ID эпика");
         }
     }
+
 }

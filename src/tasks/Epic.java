@@ -14,6 +14,10 @@ public class Epic extends Task {
         this.endTime = null;
     }
 
+    public void setSubtasks(ArrayList<Subtask> subtasks) {
+        this.subtasks = subtasks != null ? subtasks : new ArrayList<>();
+    }
+
     public void updateEpicStatusTime() {
         epicStatusTracker();
         calculateTime();
@@ -55,6 +59,9 @@ public class Epic extends Task {
         boolean isAllNew = true;
         boolean isAllDone = true;
         for (Subtask subtask : subtasks) {
+            if (subtask.getTaskStatus() == null) {
+                continue;
+            }
             if (!subtask.getTaskStatus().equals(TaskStatus.NEW)) {
                 isAllNew = false;
             }
