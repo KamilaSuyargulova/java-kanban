@@ -7,9 +7,6 @@ import manager.*;
 import tasks.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class TasksHandler extends BaseHttpHandler implements HttpHandler {
 
@@ -55,13 +52,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     private void handleGetAllTasks(HttpExchange exchange) throws IOException {
-        List<Task> tasks = taskManager.getAllTasks();
-        List<Map<String, Object>> responseList = new ArrayList<>();
-
-        for (Task task : tasks) {
-            responseList.add(createTaskMap(task));
-        }
-        sendSuccess(exchange, gson.toJson(responseList));
+        sendSuccess(exchange, gson.toJson(taskManager.getAllTasks()));
     }
 
     private void handleGetTaskById(HttpExchange exchange, String idStr) throws IOException {
@@ -69,8 +60,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
             int id = Integer.parseInt(idStr);
             Task task = taskManager.getTaskById(id);
             if (task != null) {
-                String response = gson.toJson(task);
-                sendSuccess(exchange, response);
+                sendSuccess(exchange, gson.toJson(task));
             } else {
                 sendNotFound(exchange);
             }
@@ -87,10 +77,6 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                 sendBadRequest(exchange, "Поле 'taskName' обязательно");
                 return;
             }
-            if (!isTimeValid(task)) {
-                sendHasInteractions(exchange);
-                return;
-            }
             if (task.getId() == 0) {
                 taskManager.addNewTask(task);
                 sendCreated(exchange, gson.toJson(createTaskMap(task)));
@@ -100,6 +86,8 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
             }
         } catch (JsonSyntaxException e) {
             sendBadRequest(exchange, "Неверный формат JSON: " + e.getMessage());
+        } catch (ManagerValidateException e) {
+            sendHasInteractions(exchange);
         } catch (IllegalStateException e) {
             sendBadRequest(exchange, e.getMessage());
         } catch (Exception e) {

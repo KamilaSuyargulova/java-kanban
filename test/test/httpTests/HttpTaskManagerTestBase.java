@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import http.BaseHttpHandler;
 import http.HttpTaskServer;
+import http.timeAdapter.*;
 import manager.Managers;
 import manager.TaskManager;
 import org.junit.jupiter.api.AfterEach;
@@ -44,8 +45,8 @@ public class HttpTaskManagerTestBase {
 
     protected Gson createGson() {
         return new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new BaseHttpHandler.LocalDateTimeAdapter())
-                .registerTypeAdapter(Duration.class, new BaseHttpHandler.DurationAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
     }
 

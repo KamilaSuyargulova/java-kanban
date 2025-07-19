@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface TaskManager {
 
-    List<Task> getPrioritizedTasks();
+    void validateTaskTime(Task task);
 
-    boolean isTimeOverlap(Task task1, Task task2);
+    List<Task> getPrioritizedTasks();
 
     //задачи
     ArrayList<Task> getAllTasks();

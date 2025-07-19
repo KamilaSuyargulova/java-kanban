@@ -7,8 +7,6 @@ import manager.*;
 import tasks.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
@@ -55,16 +53,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
     }
 
     private void handleGetAllSubtasks(HttpExchange exchange) throws IOException {
-        List<Subtask> subtasks = taskManager.getAllSubtasks();
-        List<Map<String, Object>> responseList = new ArrayList<>();
-
-        for (Subtask subtask : subtasks) {
-            Map<String, Object> subtaskMap = createTaskMap(subtask);
-            subtaskMap.put("epicId", subtask.getEpicId());
-            responseList.add(subtaskMap);
-        }
-
-        sendSuccess(exchange, gson.toJson(responseList));
+        sendSuccess(exchange, gson.toJson(taskManager.getAllSubtasks()));
     }
 
     private void handleGetSubtaskById(HttpExchange exchange, String idStr) throws IOException {
@@ -72,9 +61,7 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
             int id = Integer.parseInt(idStr);
             Subtask subtask = taskManager.getSubtaskById(id);
             if (subtask != null) {
-                Map<String, Object> subtaskMap = createTaskMap(subtask);
-                subtaskMap.put("epicId", subtask.getEpicId());
-                sendSuccess(exchange, gson.toJson(subtaskMap));
+                sendSuccess(exchange, gson.toJson(subtask));
             } else {
                 sendNotFound(exchange);
             }
@@ -117,11 +104,6 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
                 return;
             }
 
-            if (subtask.getStartTime() != null && !isTimeValid(subtask)) {
-                sendHasInteractions(exchange);
-                return;
-            }
-
             if (subtask.getId() == 0) {
                 taskManager.addNewSubtask(subtask);
                 sendCreated(exchange, createSuccessResponse(subtask));
@@ -131,6 +113,8 @@ public class SubtasksHandler extends BaseHttpHandler implements HttpHandler {
             }
         } catch (JsonSyntaxException e) {
             sendBadRequest(exchange, "Ошибка в формате JSON");
+        } catch (ManagerValidateException e) {
+            sendHasInteractions(exchange);
         } catch (Exception e) {
             e.printStackTrace();
             sendInternalError(exchange);

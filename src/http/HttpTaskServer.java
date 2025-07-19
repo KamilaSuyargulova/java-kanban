@@ -7,9 +7,9 @@ import manager.TaskManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-public class HttpTaskServer {                //При проверке работы в insomnia всплыло много недочетов
-    private static final int PORT = 8080;   //пришлось нестколько раз переписать класы пакета http и немного старых
-    private final HttpServer server;       //боюсь что-то еще менять
+public class HttpTaskServer {
+    private static final int PORT = 8080;
+    private final HttpServer server;
     private final TaskManager taskManager;
 
     public HttpTaskServer(TaskManager manager) throws IOException {

@@ -7,8 +7,6 @@ import tasks.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
 
@@ -22,7 +20,7 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
             String method = exchange.getRequestMethod();
             String path = exchange.getRequestURI().getPath();
             if (!"GET".equals(method)) {
-                sendNotFound(exchange);
+                sendMethodNotAllowed(exchange);
                 return;
             }
             if ("/prioritized".equals(path)) {
@@ -38,21 +36,7 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
 
     private void handleGetPrioritized(HttpExchange exchange) throws IOException {
         List<Task> prioritizedTasks = taskManager.getPrioritizedTasks();
-
-        List<Map<String, Object>> responseList = prioritizedTasks.stream()
-                .map(task -> {
-                    Map<String, Object> taskMap = createTaskMap(task);
-                    if (task instanceof Subtask) {
-                        taskMap.put("epicId", ((Subtask) task).getEpicId());
-                    } else if (task instanceof Epic) {
-                        taskMap.put("subtasks", ((Epic) task).getSubtasks().stream()
-                                .map(Subtask::getId)
-                                .collect(Collectors.toList()));
-                    }
-                    return taskMap;
-                })
-                .collect(Collectors.toList());
-        sendSuccess(exchange, gson.toJson(responseList));
+        sendSuccess(exchange, gson.toJson(prioritizedTasks));
     }
 
 }

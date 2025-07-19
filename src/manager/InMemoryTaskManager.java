@@ -29,7 +29,7 @@ public class InMemoryTaskManager implements TaskManager {
         return new ArrayList<>(prioritizedTasks);
     }
 
-    private void validateTaskTime(Task newTask) {
+    public void validateTaskTime(Task newTask) {
         if (newTask.getStartTime() == null) {
             return;
         }
@@ -44,8 +44,7 @@ public class InMemoryTaskManager implements TaskManager {
                 });
     }
 
-    @Override
-    public boolean isTimeOverlap(Task task1, Task task2) {
+    private boolean isTimeOverlap(Task task1, Task task2) {
         LocalDateTime start1 = task1.getStartTime();
         LocalDateTime end1 = task1.getEndTime();
         LocalDateTime start2 = task2.getStartTime();
