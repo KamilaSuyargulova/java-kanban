@@ -10,6 +10,7 @@ public class Subtask extends Task {
                    LocalDateTime startTime) {
         super(taskName, taskDescription, id, duration, startTime);
         this.epicId = epicId;
+        setTaskStatus(TaskStatus.NEW);
     }
 
     public int getEpicId() {

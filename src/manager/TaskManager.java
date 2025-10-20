@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface TaskManager {
 
+    void validateTaskTime(Task task);
+
     List<Task> getPrioritizedTasks();
 
     //задачи
@@ -20,7 +22,7 @@ public interface TaskManager {
 
     void clearAllTasks();
 
-    void removeTaskById(int id);
+    boolean removeTaskById(int id);
 
     void updateTask(Task task);
 
@@ -33,7 +35,7 @@ public interface TaskManager {
 
     void clearAllSubtasks();
 
-    void removeSubtaskById(int id);
+    boolean removeSubtaskById(int id);
 
     void updateSubtask(Subtask subtask);
 
@@ -44,7 +46,7 @@ public interface TaskManager {
 
     Epic getEpicById(int id);
 
-    void removeEpicById(int id);
+    boolean removeEpicById(int id);
 
     void updateEpic(Epic epic);
 
